@@ -7,3 +7,4 @@ fpdf
 pymupdf
 matplotlib
 seaborn
+plotly
