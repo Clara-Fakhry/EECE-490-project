@@ -1106,7 +1106,7 @@ def app():
 
                             # 3. Timeline for goal progress
                             try:
-    # Assume steps and completed_steps are available
+                                # Assume steps and completed_steps are available
                                 timestamps, progress_data = generate_timeline(steps, completed_steps)
                                 timeline_fig = go.Figure(data=[
                                     go.Scatter(x=timestamps, y=progress_data, mode='lines+markers', name='Progress')
@@ -1123,12 +1123,12 @@ def app():
                                 fig = generate_timeline(timeline_data)
                                 st.plotly_chart(fig)
 
-                        except ValueError:
+                            except ValueError:
                                 st.error("Invalid input. Please enter valid step numbers.")
 
                             # Set reminder feature for goal deadlines
-                        reminder_date = st.date_input("Set a reminder date for this goal (optional):", min_value=datetime.date.today())
-                        if reminder_date:
+                            reminder_date = st.date_input("Set a reminder date for this goal (optional):", min_value=datetime.date.today())
+                            if reminder_date:
                                 days_left = (reminder_date - datetime.date.today()).days
                                 if days_left > 0:
                                     st.write(f"Reminder set for {days_left} days from today.")
@@ -1136,6 +1136,7 @@ def app():
                                     st.write("Reminder: Goal deadline is today!")
                                 else:
                                     st.write("The reminder date has passed.")
+
 
             # Ask the user if they want to continue tracking another goal
             st.write("---")
