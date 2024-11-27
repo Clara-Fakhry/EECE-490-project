@@ -13,52 +13,20 @@ import seaborn as sns
 import pandas as pd
 from fpdf import FPDF
 import json
+import plotly.express as px
+from datetime import datetime
 
 #backend
-def save_goal_progress_to_file(filename="goal_progress.json"):
+def save_data_to_file(data, file_path):
+    with open(file_path, 'w') as f:
+        json.dump(data, f)
+
+def load_data_from_file(file_path):
     try:
-        # Save the global goal_completion_tracker to a JSON file
-        with open(filename, 'w') as f:
-            json.dump(goal_completion_tracker, f, indent=4)
-        print(f"Goal progress successfully saved to {filename}")
-    except Exception as e:
-        print(f"Error saving goal progress: {e}")
-def load_goal_progress_from_file(filename="goal_progress.json"):
-    try:
-        # Load the global goal_completion_tracker from the JSON file
-        with open(filename, 'r') as f:
-            global goal_completion_tracker
-            goal_completion_tracker = json.load(f)
-        print(f"Goal progress successfully loaded from {filename}")
+        with open(file_path, 'r') as f:
+            return json.load(f)
     except FileNotFoundError:
-        print(f"No saved progress found. Starting fresh.")
-    except Exception as e:
-        print(f"Error loading goal progress: {e}")
-
-import json
-import os
-
-# Function to save data to JSON file
-def save_to_json(data, filename="user_data.json"):
-    try:
-        with open(filename, "w") as json_file:
-            json.dump(data, json_file)
-        st.success("Progress saved successfully!")
-    except Exception as e:
-        st.error(f"Error saving data: {e}")
-
-# Function to load data from JSON file
-def load_from_json(filename="user_data.json"):
-    if os.path.exists(filename):
-        try:
-            with open(filename, "r") as json_file:
-                data = json.load(json_file)
-            return data
-        except Exception as e:
-            st.error(f"Error loading data: {e}")
-            return None
-    else:
-        return None
+        return {}
 
 
 # Set your API key securely (e.g., using environment variables)
@@ -804,6 +772,12 @@ def plot_progress_chart(progress):
     ax.set_title("Goal Progress")
     st.pyplot(fig)
 
+# Function to generate a timeline of goal progress
+def generate_timeline(steps, completed_steps):
+    timestamps = [datetime.now().strftime('%Y-%m-%d %H:%M:%S') for _ in steps]  # Simulated timestamps for steps
+    progress = [1 if step in completed_steps else 0 for step in steps]
+    return timestamps, progress
+
 import streamlit as st
 import plotly.graph_objects as go
 
@@ -812,6 +786,9 @@ import plotly.graph_objects as go
 
 
 def app():
+    session_data = load_data_from_file('user_data.json')
+    if session_data:
+        st.session_state.update(session_data)
     global goal_completion_tracker
     # Streamlit App
     st.set_page_config(page_title="Career Recommendation System", layout="wide")
@@ -894,6 +871,10 @@ def app():
             st.session_state["cv_text"] = cv_text  # Save to session_state
             st.session_state["uploaded_file"]=uploaded_file
 
+            # Save session state to a file after uploading CV
+            save_data_to_file(st.session_state, 'user_data.json')
+
+
     # View Recommendations Section
     elif navigation == "View Recommendations":
         st.title("Career Recommendations")
@@ -904,6 +885,7 @@ def app():
                 with st.spinner("Analyzing CV features..."):
                     cv_features = get_cv_features(st.session_state["cv_text"])
                 st.session_state["cv_features"] = cv_features  # Save to session_state
+
             if "potential_roles" not in st.session_state:
                 with st.spinner("Generating potential job roles..."):
                     potential_roles = generate_potential_roles(cv_features)
@@ -913,11 +895,25 @@ def app():
                 with st.spinner("Analyzing roles with CV..."):
                     role_analysis = analyze_roles_with_cv(cv_features, potential_roles)
                 st.session_state["role_analysis"] = role_analysis  # Save to session_state
+            
+            # Visuals:
+            # Bubble chart for job roles analysis (you can replace with your actual analysis data)
+            if "role_analysis" in st.session_state:
+                plot_bubble_chart(st.session_state["role_analysis"], 'relevance', 'satisfaction', 'opportunities', "Role Analysis")
 
-            st.subheader("Potential Job Roles")
-            st.write(st.session_state["potential_roles"])
+            # Display job roles with confidence scores (use bar chart or other visual aids)
+            if "potential_roles" in st.session_state:
+                st.subheader("Potential Job Roles")
+                st.write(st.session_state["potential_roles"])
+                # Example: Display confidence scores using a bar chart or progress indicator for each role
+                st.bar_chart([role['confidence_score'] for role in st.session_state["potential_roles"]])
+            
+            # Save session state to a file after generating recommendations
+            save_data_to_file(st.session_state, 'user_data.json')
+            
         else:
             st.warning("Please upload your CV first!")
+
 
 
 
@@ -942,25 +938,64 @@ def app():
                 )
                 career_titles = extract_career_titles(refined_recommendations)
 
-                # Display refined recommendations if the user submitted feedback
+                # Visuals
                 if refined_recommendations and refined_matches:
                     st.success("Recommendations refined successfully!")
-
-                    # Display refined recommendations
+                    
+                    # Display refined career recommendations
                     st.subheader("✨ Refined Career Recommendations")
                     for idx, role in enumerate(career_titles, start=1):
                         st.markdown(f"**{idx}. {role}**")
-
-                    # Display skill match data as a styled dataframe
+                    
+                    # Visualizing skill match percentages using interactive bar chart (Plotly)
                     st.subheader("📊 Skill Match Percentages")
                     skill_match_df = pd.DataFrame({
                         "Job Role": career_titles,
                         "Skill Match (%)": refined_matches,
                     })
                     st.table(skill_match_df)
+                    
+                    # Interactive bar chart
+                    fig = px.bar(skill_match_df, x="Job Role", y="Skill Match (%)", 
+                                title="Skill Match Percentages", 
+                                labels={"Skill Match (%)": "Match Percentage", "Job Role": "Career Role"},
+                                color="Skill Match (%)", color_continuous_scale='Blues')
+                    fig.update_traces(texttemplate='%{y}%', textposition='outside')
+                    st.plotly_chart(fig)
+
+                    # Radar chart for skill matching (Plotly)
+                    fig = go.Figure()
+                    for idx, role in enumerate(career_titles):
+                        fig.add_trace(go.Scatterpolar(
+                            r=[refined_matches[idx], 50, 60, 70],  # Example skill values for each role
+                            theta=["Skill 1", "Skill 2", "Skill 3", "Skill 4"],  # Example skills
+                            fill='toself',
+                            name=role
+                        ))
+
+                    fig.update_layout(
+                        polar=dict(
+                            radialaxis=dict(visible=True, range=[0, 100])
+                        ),
+                        showlegend=True,
+                        title="Skill Match Radar Chart"
+                    )
+                    st.plotly_chart(fig)
+
+                    # Pie chart for role distribution (Plotly)
+                    fig = px.pie(skill_match_df, values="Skill Match (%)", names="Job Role", title="Skill Match Distribution")
+                    st.plotly_chart(fig)
+
+                   
+                    # Reasoning for matches
+                    st.subheader("🔍 Reasoning for Matches")
+                    reasonings_df = pd.DataFrame({
+                        "Job Role": career_titles,
+                        "Reasoning": reasonings
+                    })
+                    st.write(reasonings_df)
 
                     # Display reasoning for matches
-                    st.subheader("🔍 Reasoning for Matches")
                     for idx, role in enumerate(career_titles, start=1):
                         st.markdown(f"**{idx}. {role}:** {reasonings[idx - 1]}")
 
@@ -973,6 +1008,9 @@ def app():
             # If no CV is uploaded yet, prompt the user to upload it
             st.warning("Please upload your CV first!")
 
+                # Save session state to a file after uploading CV
+            save_data_to_file(st.session_state, 'user_data.json')
+
 
 
 
@@ -981,14 +1019,14 @@ def app():
     elif navigation == "Generate and Track SMART Goals":
         st.title("Generate and Track SMART Goals")
 
-        # Validate that refined recommendations exist
+                # Validate that refined recommendations exist
         if "refined_recommendations" not in st.session_state or not st.session_state["refined_recommendations"]:
             st.warning("Please refine recommendations first in the 'Feedback & Refinement' section.")
         else:
             # Ensure SMART goals are generated only once
             if "smart_goals" not in st.session_state:
                 refined_recommendations = st.session_state["refined_recommendations"]
-                career_titles = extract_career_titles(refined_recommendations)
+                career_titles = refined_recommendations  # Replace with career titles
                 st.session_state["career_titles"] = career_titles
                 st.session_state["smart_goals"] = {}
                 for title in career_titles:
@@ -1001,11 +1039,9 @@ def app():
                 ["Select a career recommendation"] + list(st.session_state["smart_goals"].keys())
             )
 
-            # Store the user's selected role in session state
             if selected_role != "Select a career recommendation":
                 st.session_state["selected_role"] = selected_role
 
-            # Display SMART goals for the selected role
             if "selected_role" in st.session_state:
                 selected_role = st.session_state["selected_role"]
                 smart_goals_text = st.session_state["smart_goals"].get(selected_role, "")
@@ -1030,11 +1066,12 @@ def app():
                     # Track progress for the selected goal
                     st.subheader(f"Tracking Progress for: {selected_goal_title}")
                     selected_goal = full_goals[selected_goal_title]
-                    steps = extract_steps(selected_goal)  # Assuming `extract_steps` is a helper function
+                    steps = selected_goal.split(".")  # Simple step extraction (replace with actual logic)
                     completed_steps = st.session_state.get(selected_goal_title, [])
 
+                    # Display steps for the goal
                     for i, step in enumerate(steps, 1):
-                        st.write(f"{i}. {step}")
+                        st.write(f"{i}. {step.strip()}")
 
                     # Input completed steps
                     completed_input = st.text_input("Enter completed step numbers (comma-separated):")
@@ -1056,8 +1093,49 @@ def app():
                             progress = calculate_goal_progress(steps, completed_steps)
                             st.write(f"Goal Completion Progress: {progress:.2f}%")
 
-                        except ValueError:
-                            st.error("Invalid input. Please enter valid step numbers.")
+                            # Visualize progress
+                            # 1. Progress Bar
+                            st.progress(progress / 100)
+
+                            # 2. Pie Chart for goal completion
+                            goal_data = {'Completed': len(completed_steps), 'Remaining': len(steps) - len(completed_steps)}
+                            fig = px.pie(values=goal_data.values(), names=goal_data.keys(), title=f"{selected_goal_title} Completion")
+                            st.plotly_chart(fig)
+
+                           
+
+                            # 3. Timeline for goal progress
+                            try:
+    # Assume steps and completed_steps are available
+                                timestamps, progress_data = generate_timeline(steps, completed_steps)
+                                timeline_fig = go.Figure(data=[
+                                    go.Scatter(x=timestamps, y=progress_data, mode='lines+markers', name='Progress')
+                                ])
+                                timeline_fig.update_layout(
+                                    title="Goal Progress Over Time",
+                                    xaxis_title="Date",
+                                    yaxis_title="Progress (0: Not Completed, 1: Completed)"
+                                )
+                                st.plotly_chart(timeline_fig)
+
+                                # Example additional data for generating a timeline with 10 progress steps
+                                timeline_data = {selected_goal_title: [progress for _ in range(10)]}  # Example data
+                                fig = generate_timeline(timeline_data)
+                                st.plotly_chart(fig)
+
+                            except ValueError:
+                                st.error("Invalid input. Please enter valid step numbers.")
+
+                            # Set reminder feature for goal deadlines
+                            reminder_date = st.date_input("Set a reminder date for this goal (optional):", min_value=datetime.date.today())
+                            if reminder_date:
+                                days_left = (reminder_date - datetime.date.today()).days
+                                if days_left > 0:
+                                    st.write(f"Reminder set for {days_left} days from today.")
+                                elif days_left == 0:
+                                    st.write("Reminder: Goal deadline is today!")
+                                else:
+                                    st.write("The reminder date has passed.")
 
             # Ask the user if they want to continue tracking another goal
             st.write("---")
@@ -1071,6 +1149,9 @@ def app():
             else:
                 st.write("### Congratulations!")
                 st.write("You've made significant progress. Keep up the great work!")
+
+            # Save session state to a file after uploading CV
+            save_data_to_file(st.session_state, 'user_data.json')
 
     # Personalized Image Prompt in the Motivational Quotes Section
     elif navigation == "Motivational Quotes":
@@ -1095,6 +1176,10 @@ def app():
             **Start today. Dream big. Take action now.**
             **Let's make your career extraordinary!**
             """)
+
+            # Save session state to a file after uploading CV
+            save_data_to_file(st.session_state, 'user_data.json')
+
     # Add a button to download the full report
     if st.button("Download Full Report as PDF"):
         # Generate the full report
@@ -1109,22 +1194,11 @@ def app():
                 mime="application/pdf"
             )
 
-# Main Streamlit app entry point
-def main():
-    st.title("Career Recommendation System")
-    st.write("Upload your CV to get personalized career recommendations and refine them based on feedback.")
-
-    uploaded_file = st.file_uploader("Upload your CV (PDF format only):", type=["pdf"])
-
-    if uploaded_file:
-        with st.spinner("Processing your CV..."):
-            try:
-                career_recommendation_engine_with_feedback_and_skill_match_ui(uploaded_file)
-            except Exception as e:
-                st.error(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     app()
+
+#URL : https://content-79gqbaprmemdywlzc4yvek.streamlit.app/
 
 
 
