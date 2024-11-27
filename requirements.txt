@@ -6,8 +6,3 @@ openai==0.28
 fpdf
 pymupdf
 matplotlib
-json
-mimetypes
-io
-os
-uuid
