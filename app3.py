@@ -1019,7 +1019,7 @@ def app():
     elif navigation == "Generate and Track SMART Goals":
         st.title("Generate and Track SMART Goals")
 
-                # Validate that refined recommendations exist
+        # Validate that refined recommendations exist
         if "refined_recommendations" not in st.session_state or not st.session_state["refined_recommendations"]:
             st.warning("Please refine recommendations first in the 'Feedback & Refinement' section.")
         else:
@@ -1102,8 +1102,6 @@ def app():
                             fig = px.pie(values=goal_data.values(), names=goal_data.keys(), title=f"{selected_goal_title} Completion")
                             st.plotly_chart(fig)
 
-                           
-
                             # 3. Timeline for goal progress
                             try:
                                 # Assume steps and completed_steps are available
@@ -1137,22 +1135,25 @@ def app():
                                 else:
                                     st.write("The reminder date has passed.")
 
+                        except ValueError:
+                            st.error("Invalid input. Please enter valid step numbers.")
 
-            # Ask the user if they want to continue tracking another goal
-            st.write("---")
-            continue_choice = st.radio("Would you like to track another goal?", ["Yes", "No"])
+                    # Ask the user if they want to continue tracking another goal
+                    st.write("---")
+                    continue_choice = st.radio("Would you like to track another goal?", ["Yes", "No"])
 
-            if continue_choice == "Yes":
-                # Clear the selected role and goal but retain SMART goals
-                st.session_state.pop("selected_role", None)
-                st.session_state.pop("selected_goal_title", None)
-                st.experimental_rerun()
-            else:
-                st.write("### Congratulations!")
-                st.write("You've made significant progress. Keep up the great work!")
+                    if continue_choice == "Yes":
+                        # Clear the selected role and goal but retain SMART goals
+                        st.session_state.pop("selected_role", None)
+                        st.session_state.pop("selected_goal_title", None)
+                        st.experimental_rerun()
+                    else:
+                        st.write("### Congratulations!")
+                        st.write("You've made significant progress. Keep up the great work!")
 
-            # Save session state to a file after uploading CV
-            save_data_to_file(st.session_state, 'user_data.json')
+                    # Save session state to a file after uploading CV
+                    save_data_to_file(st.session_state, 'user_data.json')
+
 
     # Personalized Image Prompt in the Motivational Quotes Section
     elif navigation == "Motivational Quotes":
