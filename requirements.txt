@@ -6,3 +6,4 @@ openai==0.28
 fpdf
 pymupdf
 matplotlib
+seasborn
