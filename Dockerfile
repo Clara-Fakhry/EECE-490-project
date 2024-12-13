@@ -1,19 +1,20 @@
+
 # Use an official Python runtime as a parent image
 FROM python:3.9-slim
 
 # Set the working directory in the container
-WORKDIR /systemenglish
+WORKDIR /finalapp
 
 # Copy the current directory contents into the container at /app
-COPY . /systemenglish
+COPY . /finalapp
 RUN pip uninstall -y openai
 
 # Install the necessary libraries
 RUN pip install --no-cache-dir PyMuPDF openai==0.28 streamlit
 
 # Expose the port that Streamlit will run on
-EXPOSE 8502
+EXPOSE 8501
 
 # Command to run the Streamlit app
-CMD ["streamlit", "run", "systemenglish.py"]
+CMD ["streamlit", "run", "finalapp.py"]
 
