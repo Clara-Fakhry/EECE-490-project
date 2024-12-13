@@ -1053,6 +1053,7 @@ def app():
                 with st.spinner(dynamic_translate("Analyzing roles with CV...", st.session_state["language"])):
                     role_analysis = analyze_roles_with_cv(cv_features, potential_roles)
                 st.session_state["role_analysis"] = role_analysis
+                st.write(dynamic_translate(role_analysis, st.session_state["language"]))
         else:
             st.warning(dynamic_translate("Please upload your CV first!", st.session_state["language"]))
 
