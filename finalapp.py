@@ -683,8 +683,6 @@ def generated_smart_goals(refined_recommendation):
 
 
 
-def set_navigation(selected_option):
-    st.session_state["navigation"] = selected_option
 
 def interactive_feedback_loop(recommendations, potential_roles, role_analysis, cv_features):
     # Initialize variables
