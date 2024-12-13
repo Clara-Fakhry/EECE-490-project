@@ -1,16 +1,10 @@
+
+
+import tempfile
+import os
 import fitz  # PyMuPDF
 import openai
-import uuid
-import os
-import io
-import fitz
-import mimetypes
 import streamlit as st
-import tempfile
-
-import numpy as np
-import seaborn as sns
-
 
 
 
@@ -26,13 +20,8 @@ def get_chatgpt_response(prompt, model="gpt-4"):
     )
     return response.choices[0].message['content']
 
-# Helper function to validate if the uploaded file is a PDF
-def is_valid_pdf(uploaded_file):
-    mime_type, _ = mimetypes.guess_type(uploaded_file.name)
-    return mime_type == "application/pdf"
 
-import tempfile
-import shutil
+
 
 def extract_text_from_pdf(uploaded_file):
     # Create a temporary file to save the uploaded file
