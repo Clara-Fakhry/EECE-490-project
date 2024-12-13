@@ -1,12 +1,15 @@
+
+import tempfile
+import os
 import fitz  # PyMuPDF
 import openai
-import uuid
-import os
-import io
-
-import mimetypes
 import streamlit as st
-import tempfile
+
+
+
+# Set your API key securely (e.g., using environment variables)
+openai.api_key = ""  # Or use getpass to input securely
+
 
 
 
@@ -39,15 +42,10 @@ def dynamic_translate(text, target_language):
     except Exception as e:
         return f"[Error Translating]: {e}"
 
-#backend
-
-import os
 
 
 
 
-# Set your API key securely (e.g., using environment variables)
-openai.api_key = ""  # Or use getpass to input securely
 
 def get_chatgpt_response(prompt, model="gpt-4"):
     response = openai.ChatCompletion.create(
@@ -61,8 +59,7 @@ def is_valid_pdf(uploaded_file):
     mime_type, _ = mimetypes.guess_type(uploaded_file.name)
     return mime_type == "application/pdf"
 
-import tempfile
-import shutil
+
 
 def extract_text_from_pdf(uploaded_file):
     # Create a temporary file to save the uploaded file
@@ -647,7 +644,7 @@ goal_completion_tracker_ui = {}
 
 
 
-import streamlit as st
+
 
 
 def generated_smart_goals(refined_recommendation):
