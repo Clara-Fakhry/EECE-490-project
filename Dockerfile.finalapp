@@ -13,8 +13,9 @@ RUN pip uninstall -y openai
 RUN pip install --no-cache-dir PyMuPDF openai==0.28 streamlit
 
 # Expose the port that Streamlit will run on
-EXPOSE 8501
+EXPOSE 8506
+
 
 # Command to run the Streamlit app
-CMD ["streamlit", "run", "finalapp.py"]
+CMD ["streamlit", "run", "finalapp.py", "--server.port=8506"]
 
