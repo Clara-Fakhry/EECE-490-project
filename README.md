@@ -71,7 +71,20 @@ streamlit run finalapp.py
 ![image](https://github.com/user-attachments/assets/271f2432-b7a3-4d7f-8a1a-eaf75cd1d5e3)
 
 # Contributors 
+**Charbel Abou Younes** 
+- developped most of the backend
+- helped in the frontend
 
-# Acknowledgement
+**Clara Fakhry**
+- Developed most of the frontend
+- helped in the backend
+
+**Dimitri Bassil**
+- helped in backend and frontend
+- Wrote the documentation
+
+
+# Acknowledgement  
+We would like to thank Doctor Ammar Mohanna for his help throughout the project.
 
 
