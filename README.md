@@ -1,4 +1,4 @@
-# Career guidance system
+# Career Guidance System
 Career Guidance System is an AI-powered application designed to assist fresh graduates in finding jobs that best suit their profiles. The application analyzes the user’s CV to extract features and skills, then presents career recommendations tailored to their qualifications. For each suggested career path, the system evaluates the candidate's strengths and weaknesses, providing insights to help them assess their chances of success and identify areas for improvement.  
 To enhance the user experience, the application invites users to rate the proposed job suggestions and provide feedback. This feedback is used to refine career recommendations. Additionally, the program creates specific goals for each career path, broken into manageable steps. Users can track their progress toward these goals, and the app offers resources to support them in completing the remaining steps.
 
