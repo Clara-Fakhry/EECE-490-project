@@ -68,7 +68,8 @@ streamlit run finalapp.py
 
 
 # Code flow
-![image](https://github.com/user-attachments/assets/271f2432-b7a3-4d7f-8a1a-eaf75cd1d5e3)
+![image](https://github.com/user-attachments/assets/52979a89-1599-4067-a41d-68615f77f8d8)
+
 
 # Contributors 
 **Charbel Abou Younes** 
