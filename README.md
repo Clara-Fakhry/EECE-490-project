@@ -85,7 +85,7 @@ streamlit run finalapp.py
 - Wrote the documentation
 
 
-# Acknowledgement  
+# Acknowledgements   
 We would like to thank Doctor Ammar Mohanna for his help throughout the project.
 
 
